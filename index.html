@@ -159,7 +159,9 @@
 </div>
 
 <script>
-    const apiURL = "https://script.google.com/macros/s/AKfycbx8EyqGXExe7b2ChGA6kYWVv3rMHsHcFAiDVmuRpF7-VbnOIeCtr-Iet83nNvDTa_7Pcg/exec";
+    // Updated with your new Deployment Link
+    const apiURL = "https://script.google.com/macros/s/AKfycbySM6WKSgjEAsHSq_V_vwYL7I4Wspc_8GOqvfWzhIbeeWKS-7iNmqVKfceH88KnlPoRDA/exec";
+    
     let questions = [], current = 0, answers = [], audioLogs = {}, timeLeft = 50 * 60;
     let cbList = [1, 2, 3, 4, 5], cbIdx = 0, cbAnswers = [];
     let globalPhone = "", isReviewing = false;
@@ -198,7 +200,7 @@
         } catch (e) { alert("Error connecting to server!"); btn.disabled = false; }
     }
 
-    // ပြင်ဆင်ထားသော Auto Telegram Submission Function
+    // Improved submitPayment with Image Compression to prevent "Failed to fetch"
     function submitPayment() {
         const name = document.getElementById('pay-name-input').value;
         const phone = document.getElementById('user-phone').value;
@@ -210,14 +212,40 @@
         if (!name || !fileInput.files[0]) return alert("အမည် နှင့် Screenshot ပုံ ထည့်သွင်းပါ");
 
         btn.disabled = true;
-        btn.innerText = "Sending... Please wait";
-        status.innerText = "Processing Image...";
+        btn.innerText = "Processing Image...";
+        status.innerText = "Compressing photo for faster upload...";
 
         const file = fileInput.files[0];
         const reader = new FileReader();
         
-        reader.onload = async function(e) {
-            const base64Image = e.target.result;
+        reader.onload = function(e) {
+            const img = new Image();
+            img.src = e.target.result;
+            img.onload = function() {
+                // Compression Logic
+                const canvas = document.createElement('canvas');
+                let width = img.width;
+                let height = img.height;
+                const MAX_WIDTH = 800; // Resize to max 800px width
+                if (width > MAX_WIDTH) {
+                    height *= MAX_WIDTH / width;
+                    width = MAX_WIDTH;
+                }
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+                
+                // Convert to JPEG with 0.7 quality
+                const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
+                
+                sendDataToTelegram(compressedBase64);
+            };
+        };
+        reader.readAsDataURL(file);
+
+        async function sendDataToTelegram(base64Image) {
+            status.innerText = "Sending to Teacher...";
             const data = {
                 action: "sendToTelegram",
                 name: name,
@@ -227,19 +255,23 @@
             };
 
             try {
+                // Using mode 'no-cors' to avoid browser blocks, though doOptions handles it
                 await fetch(apiURL, {
                     method: "POST",
+                    mode: 'no-cors',
+                    cache: 'no-cache',
+                    headers: { "Content-Type": "text/plain" },
                     body: JSON.stringify(data)
                 });
                 alert("ငွေလွှဲပြေစာ ပို့ပြီးပါပြီ။ ဆရာမှ အကောင့်ဖွင့်ပေးသည်အထိ ခေတ္တစောင့်ပေးပါ။");
                 location.reload();
             } catch (err) {
-                alert("Error: " + err);
+                console.error(err);
+                alert("ပို့ဆောင်မှု မအောင်မြင်ပါ။ လိုင်းပြန်စစ်ပေးပါ။");
                 btn.disabled = false;
                 btn.innerText = "🚀 SEND TO TEACHER";
             }
-        };
-        reader.readAsDataURL(file);
+        }
     }
 
     async function startExam(name) {
@@ -331,4 +363,4 @@
     async function viewResults() { const name = prompt("အမည်ရိုက်ပါ:"); if(name) { try { const res = await fetch(`${apiURL}?viewResult=true&name=${name}`); const data = await res.json(); if(data.length > 0) alert(`${name} ၏ ရမှတ်: ${data[data.length-1][4]}`); else alert("မရှိပါ"); } catch(e) { alert("Error"); } } }
 </script>
 </body>
-    </html>
+</html>
