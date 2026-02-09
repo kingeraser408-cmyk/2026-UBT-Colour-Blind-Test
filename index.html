@@ -85,7 +85,7 @@
         <div class="header">ငွေပေးချေရန် (အကောင့်ဖွင့်ရန်)</div>
         <p style="padding: 10px 20px; font-size: 14px; color: #ccc;">အောက်ပါ KBZPay QR သို့မဟုတ် ဖုန်းနံပါတ်သို့ ငွေလွှဲပေးပါ။</p>
         <center>
-            <img src="https://lh3.googleusercontent.com/d/18DPOzbs09AMibxYm0cDhi2i-6C2AbmkD" class="qr-display" alt="KPay QR">
+            <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEh_3qV9YI389mBqYw6pCq-zE-Xw5Z-GvW_RjU_M_J_8_N-k/s1600/1000001941.jpg" class="qr-display" alt="KPay QR">
             <div class="pay-info">
                 <span style="font-size: 12px; color: var(--primary);">Kpay Phone Number</span><br>
                 <strong style="font-size: 18px; letter-spacing: 1px;">09450052637</strong>
@@ -159,12 +159,13 @@
 </div>
 
 <script>
-    const apiURL = "https://script.google.com/macros/s/AKfycbwbSU1lPIiQrzqZI12SqUhQgSvflYGPe_GhgcgRw4a7TyNTKBTla4Sd_KtOnsMvsRSRWw/exec";
+    // New Deployment Web App Link
+    const apiURL = "https://script.google.com/macros/s/AKfycbySM6WKSgjEAsHSq_V_vwYL7I4Wspc_8GOqvfWzhIbeeWKS-7iNmqVKfceH88KnlPoRDA/exec";
+    
     let questions = [], current = 0, answers = [], audioLogs = {}, timeLeft = 50 * 60;
     let cbList = [1, 2, 3, 4, 5], cbIdx = 0, cbAnswers = [];
     let globalPhone = "", isReviewing = false;
     let cbTimeLeft = 60, cbTimerObj;
-    const cbKey = { 1: "35", 2: "8", 3: "16", 4: "2", 5: "57" };
 
     function getDeviceId() {
         let id = localStorage.getItem('ubt_device_id');
@@ -198,76 +199,75 @@
         } catch (e) { alert("Error connecting to server!"); btn.disabled = false; }
     }
 
-// ၂။ submitPayment Function ကို ဒီအတိုင်း အတိအကျ ပြန်ထည့်ပါ
-function submitPayment() {
-    const name = document.getElementById('pay-name-input').value;
-    const phone = document.getElementById('user-phone').value;
-    const sector = document.getElementById('user-job').value;
-    const fileInput = document.getElementById('ss-upload');
-    const btn = document.getElementById('send-btn');
-    const status = document.getElementById('upload-status');
+    // Fix "Failed to fetch" using mode: 'no-cors'
+    function submitPayment() {
+        const name = document.getElementById('pay-name-input').value;
+        const phone = document.getElementById('user-phone').value;
+        const sector = document.getElementById('user-job').value;
+        const fileInput = document.getElementById('ss-upload');
+        const btn = document.getElementById('send-btn');
+        const status = document.getElementById('upload-status');
 
-    if (!name || !fileInput.files[0]) return alert("အမည် နှင့် Screenshot ပုံ ထည့်သွင်းပါ");
+        if (!name || !fileInput.files[0]) return alert("အမည် နှင့် Screenshot ပုံ ထည့်သွင်းပါ");
 
-    btn.disabled = true;
-    btn.innerText = "Processing Image...";
+        btn.disabled = true;
+        btn.innerText = "Processing Image...";
 
-    const file = fileInput.files[0];
-    const reader = new FileReader();
-    
-    reader.onload = function(e) {
-        const img = new Image();
-        img.src = e.target.result;
-        img.onload = function() {
-            // Image Resizing (Size လျှော့ခြင်း)
-            const canvas = document.createElement('canvas');
-            let width = img.width;
-            let height = img.height;
-            const MAX_WIDTH = 800;
-            if (width > MAX_WIDTH) {
-                height *= MAX_WIDTH / width;
-                width = MAX_WIDTH;
-            }
-            canvas.width = width;
-            canvas.height = height;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0, width, height);
-            
-            const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
-            
-            const payload = {
-                action: "sendToTelegram",
-                name: name,
-                phone: phone,
-                sector: sector,
-                image: compressedBase64
+        const file = fileInput.files[0];
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+            const img = new Image();
+            img.src = e.target.result;
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                let width = img.width;
+                let height = img.height;
+                const MAX_WIDTH = 800;
+                if (width > MAX_WIDTH) {
+                    height *= MAX_WIDTH / width;
+                    width = MAX_WIDTH;
+                }
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+                
+                const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
+                
+                const payload = {
+                    action: "sendToTelegram",
+                    name: name,
+                    phone: phone,
+                    sector: sector,
+                    image: compressedBase64
+                };
+
+                status.innerText = "Sending to Teacher...";
+                
+                fetch(apiURL, {
+                    method: "POST",
+                    mode: "no-cors", // CORS ပြဿနာကို ကျော်လွှားရန်
+                    cache: "no-cache",
+                    headers: { "Content-Type": "text/plain" },
+                    body: JSON.stringify(payload)
+                })
+                .then(() => {
+                    alert("ငွေလွှဲပြေစာ ပို့ပြီးပါပြီ။ ဆရာမှ အကောင့်ဖွင့်ပေးသည်အထိ ခေတ္တစောင့်ပေးပါ။");
+                    location.reload();
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert("Error: " + err.message);
+                    btn.disabled = false;
+                    btn.innerText = "🚀 SEND TO TEACHER";
+                });
             };
-
-            status.innerText = "Sending to Teacher...";
-            
-            // fetch ကို mode: 'cors' ဖြင့် ပို့ခြင်း
-            fetch(apiURL, {
-                method: "POST",
-                headers: { "Content-Type": "text/plain;charset=utf-8" },
-                body: JSON.stringify(payload)
-            })
-            .then(res => {
-                // အောင်မြင်မှသာ alert ပြရန်
-                alert("ငွေလွှဲပြေစာ ပို့ပြီးပါပြီ။ ဆရာမှ အကောင့်ဖွင့်ပေးသည်အထိ ခေတ္တစောင့်ပေးပါ။");
-                location.reload();
-            })
-            .catch(err => {
-                console.error(err);
-                alert("ပို့ဆောင်မှု မအောင်မြင်ပါ။ Error: " + err.message);
-                btn.disabled = false;
-                btn.innerText = "🚀 SEND TO TEACHER";
-            });
         };
-    };
-    reader.readAsDataURL(file);
-}
+        reader.readAsDataURL(file);
+    }
 
-
+    // မူလ Function များ (ကျန် code များ မပြောင်းလဲပါ)
     async function startExam(name) {
         document.getElementById('login-page').classList.remove('active-page');
         document.getElementById('exam-page').classList.add('active-page');
@@ -349,7 +349,7 @@ function submitPayment() {
         document.getElementById('final-score').innerText = `Score: ${score}`; document.getElementById('status-badge').innerText = score >= 95 ? "PASS" : "FAIL";
         document.getElementById('review-list').innerHTML = reviewHTML;
         const data = { name: document.getElementById('display-name').innerText, phone: globalPhone, sector: document.getElementById('user-job').value, score: score, cbScore: "Checked" };
-        fetch(apiURL, { method: "POST", body: JSON.stringify(data) });
+        fetch(apiURL, { method: "POST", mode: "no-cors", body: JSON.stringify(data) });
     }
     function enterReview() { isReviewing = true; document.getElementById('result-page').classList.remove('active-page'); document.getElementById('exam-page').classList.add('active-page'); document.getElementById('exit-review-btn').style.display = "block"; document.getElementById('finish-btn').style.display = "none"; current = 0; renderQ(); }
     function exitReview() { isReviewing = false; document.getElementById('exam-page').classList.remove('active-page'); document.getElementById('result-page').classList.add('active-page'); document.getElementById('exit-review-btn').style.display = "none"; }
@@ -357,4 +357,4 @@ function submitPayment() {
     async function viewResults() { const name = prompt("အမည်ရိုက်ပါ:"); if(name) { try { const res = await fetch(`${apiURL}?viewResult=true&name=${name}`); const data = await res.json(); if(data.length > 0) alert(`${name} ၏ ရမှတ်: ${data[data.length-1][4]}`); else alert("မရှိပါ"); } catch(e) { alert("Error"); } } }
 </script>
 </body>
-                    </html>
+</html>
