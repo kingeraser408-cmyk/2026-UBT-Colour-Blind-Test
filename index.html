@@ -151,7 +151,7 @@
         <button class="btn" style="background:var(--primary); width: 100%; margin-bottom: 10px;" onclick="enterReview()">REVIEW ANSWERS</button>
         <div class="review-scroll" id="review-list"></div>
         <div class="contact-group" style="width: 100%;">
-            <a href="https://t.me/+Ce2IZ1F-6UNjMjVl" target="_blank" class="contact-btn tg-btn">✈ Telegram Contact</a>
+            <a href="https://t.me/UBTCBTest" target="_blank" class="contact-btn tg-btn">✈ Telegram Contact</a>
             <a href="tel:09450052637" class="contact-btn ph-btn">📞 09450052637</a>
         </div>
         <button class="btn" style="background:#2c3e50; width: 100%;" onclick="location.reload()">TRY AGAIN</button>
@@ -159,9 +159,7 @@
 </div>
 
 <script>
-    // Updated with your new Deployment Link
     const apiURL = "https://script.google.com/macros/s/AKfycbwbSU1lPIiQrzqZI12SqUhQgSvflYGPe_GhgcgRw4a7TyNTKBTla4Sd_KtOnsMvsRSRWw/exec";
-    
     let questions = [], current = 0, answers = [], audioLogs = {}, timeLeft = 50 * 60;
     let cbList = [1, 2, 3, 4, 5], cbIdx = 0, cbAnswers = [];
     let globalPhone = "", isReviewing = false;
@@ -200,79 +198,75 @@
         } catch (e) { alert("Error connecting to server!"); btn.disabled = false; }
     }
 
-    // Improved submitPayment with Image Compression to prevent "Failed to fetch"
-    function submitPayment() {
-        const name = document.getElementById('pay-name-input').value;
-        const phone = document.getElementById('user-phone').value;
-        const sector = document.getElementById('user-job').value;
-        const fileInput = document.getElementById('ss-upload');
-        const btn = document.getElementById('send-btn');
-        const status = document.getElementById('upload-status');
+// ၂။ submitPayment Function ကို ဒီအတိုင်း အတိအကျ ပြန်ထည့်ပါ
+function submitPayment() {
+    const name = document.getElementById('pay-name-input').value;
+    const phone = document.getElementById('user-phone').value;
+    const sector = document.getElementById('user-job').value;
+    const fileInput = document.getElementById('ss-upload');
+    const btn = document.getElementById('send-btn');
+    const status = document.getElementById('upload-status');
 
-        if (!name || !fileInput.files[0]) return alert("အမည် နှင့် Screenshot ပုံ ထည့်သွင်းပါ");
+    if (!name || !fileInput.files[0]) return alert("အမည် နှင့် Screenshot ပုံ ထည့်သွင်းပါ");
 
-        btn.disabled = true;
-        btn.innerText = "Processing Image...";
-        status.innerText = "Compressing photo for faster upload...";
+    btn.disabled = true;
+    btn.innerText = "Processing Image...";
 
-        const file = fileInput.files[0];
-        const reader = new FileReader();
-        
-        reader.onload = function(e) {
-            const img = new Image();
-            img.src = e.target.result;
-            img.onload = function() {
-                // Compression Logic
-                const canvas = document.createElement('canvas');
-                let width = img.width;
-                let height = img.height;
-                const MAX_WIDTH = 800; // Resize to max 800px width
-                if (width > MAX_WIDTH) {
-                    height *= MAX_WIDTH / width;
-                    width = MAX_WIDTH;
-                }
-                canvas.width = width;
-                canvas.height = height;
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(img, 0, 0, width, height);
-                
-                // Convert to JPEG with 0.7 quality
-                const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
-                
-                sendDataToTelegram(compressedBase64);
-            };
-        };
-        reader.readAsDataURL(file);
-
-        async function sendDataToTelegram(base64Image) {
-            status.innerText = "Sending to Teacher...";
-            const data = {
+    const file = fileInput.files[0];
+    const reader = new FileReader();
+    
+    reader.onload = function(e) {
+        const img = new Image();
+        img.src = e.target.result;
+        img.onload = function() {
+            // Image Resizing (Size လျှော့ခြင်း)
+            const canvas = document.createElement('canvas');
+            let width = img.width;
+            let height = img.height;
+            const MAX_WIDTH = 800;
+            if (width > MAX_WIDTH) {
+                height *= MAX_WIDTH / width;
+                width = MAX_WIDTH;
+            }
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+            
+            const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
+            
+            const payload = {
                 action: "sendToTelegram",
                 name: name,
                 phone: phone,
                 sector: sector,
-                image: base64Image
+                image: compressedBase64
             };
 
-            try {
-                // Using mode 'no-cors' to avoid browser blocks, though doOptions handles it
-                await fetch(apiURL, {
-                    method: "POST",
-                    mode: 'no-cors',
-                    cache: 'no-cache',
-                    headers: { "Content-Type": "text/plain" },
-                    body: JSON.stringify(data)
-                });
+            status.innerText = "Sending to Teacher...";
+            
+            // fetch ကို mode: 'cors' ဖြင့် ပို့ခြင်း
+            fetch(apiURL, {
+                method: "POST",
+                headers: { "Content-Type": "text/plain;charset=utf-8" },
+                body: JSON.stringify(payload)
+            })
+            .then(res => {
+                // အောင်မြင်မှသာ alert ပြရန်
                 alert("ငွေလွှဲပြေစာ ပို့ပြီးပါပြီ။ ဆရာမှ အကောင့်ဖွင့်ပေးသည်အထိ ခေတ္တစောင့်ပေးပါ။");
                 location.reload();
-            } catch (err) {
+            })
+            .catch(err => {
                 console.error(err);
-                alert("ပို့ဆောင်မှု မအောင်မြင်ပါ။ လိုင်းပြန်စစ်ပေးပါ။");
+                alert("ပို့ဆောင်မှု မအောင်မြင်ပါ။ Error: " + err.message);
                 btn.disabled = false;
                 btn.innerText = "🚀 SEND TO TEACHER";
-            }
-        }
-    }
+            });
+        };
+    };
+    reader.readAsDataURL(file);
+}
+
 
     async function startExam(name) {
         document.getElementById('login-page').classList.remove('active-page');
@@ -363,4 +357,4 @@
     async function viewResults() { const name = prompt("အမည်ရိုက်ပါ:"); if(name) { try { const res = await fetch(`${apiURL}?viewResult=true&name=${name}`); const data = await res.json(); if(data.length > 0) alert(`${name} ၏ ရမှတ်: ${data[data.length-1][4]}`); else alert("မရှိပါ"); } catch(e) { alert("Error"); } } }
 </script>
 </body>
-</html>
+                    </html>
