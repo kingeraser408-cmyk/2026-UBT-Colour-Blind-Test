@@ -24,7 +24,6 @@
         .tg-btn { background: var(--telegram); border: 1px solid #0077b5; }
         .ph-btn { background: var(--success); border: 1px solid #27ae60; }
         
-        /* Payment Styles */
         .qr-display { width: 220px; height: auto; border: 4px solid white; border-radius: 10px; margin: 15px 0; }
         .pay-info { background: #0d1117; padding: 10px; border-radius: 8px; border: 1px dashed var(--primary); margin: 10px 0; width: 85%; }
 
@@ -86,15 +85,23 @@
         <div class="header">ငွေပေးချေရန် (အကောင့်ဖွင့်ရန်)</div>
         <p style="padding: 10px 20px; font-size: 14px; color: #ccc;">အောက်ပါ KBZPay QR သို့မဟုတ် ဖုန်းနံပါတ်သို့ ငွေလွှဲပေးပါ။</p>
         <center>
-            <img src="https://lh3.googleusercontent.com/d/18DPOzbs09AMibxYm0cDhi2i-6C2AbmkD" class="qr-display" alt="KPay QR">
+            <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEh_3qV9YI389mBqYw6pCq-zE-Xw5Z-GvW_RjU_M_J_8_N-k/s1600/1000001941.jpg" class="qr-display" alt="KPay QR">
             <div class="pay-info">
                 <span style="font-size: 12px; color: var(--primary);">Kpay Phone Number</span><br>
                 <strong style="font-size: 18px; letter-spacing: 1px;">09450052637</strong>
             </div>
-            <p style="font-size: 12px; color: var(--gold); margin: 15px 0;">ငွေလွှဲပြီးပါက Screenshot ရိုက်၍ ပို့ပေးပါ။</p>
-            <input type="file" id="ss-upload" accept="image/*" style="margin-bottom: 10px;">
-            <button class="btn" onclick="submitPayment()">SEND TO TELEGRAM</button>
+            
+            <div style="width:85%; text-align:left; margin-top:10px;">
+                <label style="font-size:12px; color:var(--gold);">၁။ သင့်အမည်အပြည့်အစုံ ရိုက်ပါ</label>
+                <input type="text" id="pay-name-input" placeholder="Name" style="width:100%; margin-top:5px;">
+                
+                <label style="font-size:12px; color:var(--gold);">၂။ ငွေလွှဲ Screenshot တင်ပါ</label>
+                <input type="file" id="ss-upload" accept="image/*" style="margin-top:5px; font-size:12px; color:white;">
+            </div>
+
+            <button class="btn" id="send-btn" onclick="submitPayment()">🚀 SEND TO TEACHER</button>
             <button class="btn" style="background:#2c3e50; margin-top: 10px;" onclick="location.reload()">BACK</button>
+            <p id="upload-status" style="font-size:12px; color:var(--gold); margin-top:10px;"></p>
         </center>
     </div>
 </div>
@@ -152,7 +159,7 @@
 </div>
 
 <script>
-    const apiURL = "https://script.google.com/macros/s/AKfycbwMmNm5D1k35R443D6H5oF_meie8CBDq8UpCkSYSxe1zxwqLo7FubTJ4PouziaovUMX/exec";
+    const apiURL = "https://script.google.com/macros/s/AKfycbx8EyqGXExe7b2ChGA6kYWVv3rMHsHcFAiDVmuRpF7-VbnOIeCtr-Iet83nNvDTa_7Pcg/exec";
     let questions = [], current = 0, answers = [], audioLogs = {}, timeLeft = 50 * 60;
     let cbList = [1, 2, 3, 4, 5], cbIdx = 0, cbAnswers = [];
     let globalPhone = "", isReviewing = false;
@@ -181,7 +188,7 @@
             if (result.allowed) {
                 globalPhone = phone; startExam(result.name);
             } else {
-                if(result.msg.includes("မရှိပါ")) {
+                if(result.msg.includes("payment_required")) {
                     document.getElementById('login-page').classList.remove('active-page');
                     document.getElementById('payment-page').classList.add('active-page');
                 } else {
@@ -191,14 +198,48 @@
         } catch (e) { alert("Error connecting to server!"); btn.disabled = false; }
     }
 
+    // ပြင်ဆင်ထားသော Auto Telegram Submission Function
     function submitPayment() {
+        const name = document.getElementById('pay-name-input').value;
         const phone = document.getElementById('user-phone').value;
-        const file = document.getElementById('ss-upload').files[0];
-        if (!file) return alert("Screenshot ပုံအရင်တင်ပါ");
-        alert("Telegram သို့ Screenshot ပေးပို့ရန် ပြောင်းလဲနေပါသည်။");
-        const tgLink = `https://t.me/UBTCBTest?text=ကျွန်တော်ငွေလွှဲထားပါတယ်ခင်ဗျာ။%0Aဖုန်းနံပါတ်: ${phone}`;
-        window.open(tgLink, '_blank');
-        location.reload();
+        const sector = document.getElementById('user-job').value;
+        const fileInput = document.getElementById('ss-upload');
+        const btn = document.getElementById('send-btn');
+        const status = document.getElementById('upload-status');
+
+        if (!name || !fileInput.files[0]) return alert("အမည် နှင့် Screenshot ပုံ ထည့်သွင်းပါ");
+
+        btn.disabled = true;
+        btn.innerText = "Sending... Please wait";
+        status.innerText = "Processing Image...";
+
+        const file = fileInput.files[0];
+        const reader = new FileReader();
+        
+        reader.onload = async function(e) {
+            const base64Image = e.target.result;
+            const data = {
+                action: "sendToTelegram",
+                name: name,
+                phone: phone,
+                sector: sector,
+                image: base64Image
+            };
+
+            try {
+                await fetch(apiURL, {
+                    method: "POST",
+                    body: JSON.stringify(data)
+                });
+                alert("ငွေလွှဲပြေစာ ပို့ပြီးပါပြီ။ ဆရာမှ အကောင့်ဖွင့်ပေးသည်အထိ ခေတ္တစောင့်ပေးပါ။");
+                location.reload();
+            } catch (err) {
+                alert("Error: " + err);
+                btn.disabled = false;
+                btn.innerText = "🚀 SEND TO TEACHER";
+            }
+        };
+        reader.readAsDataURL(file);
     }
 
     async function startExam(name) {
