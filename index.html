@@ -73,7 +73,7 @@
             <button class="btn" id="login-btn" onclick="checkAccess()">VERIFY & START</button>
             <p id="login-msg" style="color:#ff0055; font-size:12px; margin-top:10px;"></p>
             <div class="contact-group">
-                <a href="https://t.me/UBTCBTest" target="_blank" class="contact-btn tg-btn">✈ Telegram Join</a>
+                <a href="https://t.me/NewUBT2026" target="_blank" class="contact-btn tg-btn">✈ Telegram Join</a>
                 <a href="tel:09450052637" class="contact-btn ph-btn">📞 09450052637 သို့ ဖုန်းခေါ်ဆိုရန်</a>
             </div>
             <p style="font-size: 12px; color: #58a6ff; cursor: pointer; margin-top: 15px;" onclick="viewResults()">VIEW FINAL RESULTS</p>
@@ -144,7 +144,7 @@
         <button class="btn" style="background:var(--primary); width: 100%; margin-bottom: 10px;" onclick="enterReview()">REVIEW ANSWERS</button>
         <div class="review-scroll" id="review-list"></div>
         <div class="contact-group" style="width: 100%;">
-            <a href="https://t.me/UBTCBTest" target="_blank" class="contact-btn tg-btn">✈ Telegram Contact</a>
+            <a href="https://t.me/NewUBT2026" target="_blank" class="contact-btn tg-btn">✈ Telegram Contact</a>
             <a href="tel:09450052637" class="contact-btn ph-btn">📞 09450052637</a>
         </div>
         <button class="btn" style="background:#2c3e50; width: 100%;" onclick="location.reload()">TRY AGAIN</button>
@@ -152,7 +152,7 @@
 </div>
 
 <script>
-    const apiURL = "https://script.google.com/macros/s/AKfycbxlkTOHHt3AqUilOE2xo9SpVy7vOjFK39DleUC13e7laxR67pZFKzhhgcmTRJ9_ECweXA/exec";
+    const apiURL = "https://script.google.com/macros/s/AKfycbw-ARUYydJVIejd4HqT31_9WSGjZjImvAVt9BNmJVM5VBeRlHnC9QBS_zci3iZE3NaNLw/exec";
     let questions = [], current = 0, answers = [], audioLogs = {}, timeLeft = 50 * 60;
     let cbList = [1, 2, 3, 4, 5], cbIdx = 0, cbAnswers = [];
     let globalPhone = "", isReviewing = false;
@@ -196,7 +196,7 @@
         const file = document.getElementById('ss-upload').files[0];
         if (!file) return alert("Screenshot ပုံအရင်တင်ပါ");
         alert("Telegram သို့ Screenshot ပေးပို့ရန် ပြောင်းလဲနေပါသည်။");
-        const tgLink = `https://t.me/UBTCBTest?text=ကျွန်တော်ငွေလွှဲထားပါတယ်ခင်ဗျာ။%0Aဖုန်းနံပါတ်: ${phone}`;
+        const tgLink = `@UBTCBTest?text=ကျွန်တော်ငွေလွှဲထားပါတယ်ခင်ဗျာ။%0Aဖုန်းနံပါတ်: ${phone}`;
         window.open(tgLink, '_blank');
         location.reload();
     }
@@ -290,4 +290,4 @@
     async function viewResults() { const name = prompt("အမည်ရိုက်ပါ:"); if(name) { try { const res = await fetch(`${apiURL}?viewResult=true&name=${name}`); const data = await res.json(); if(data.length > 0) alert(`${name} ၏ ရမှတ်: ${data[data.length-1][4]}`); else alert("မရှိပါ"); } catch(e) { alert("Error"); } } }
 </script>
 </body>
-                    </html>
+    </html>
